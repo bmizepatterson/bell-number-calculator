@@ -36,7 +36,14 @@ def main(argv):
 
     print('Computing the {}...\n'.format(description))
     start_time = time.time()
-    print('\nThe {} is:\n{:,}'.format(description, get_bell(n)))
+    try:
+        bell_num = get_bell(n)
+    except KeyboardInterrupt:
+        print('Aborted after {:e} seconds'.format(time.time() - start_time))
+        sys.exit()
+
+    resultStr = '\nThe {0} is exactly:\n{1:,}\n\nOr approx. {1:e}\n\nIt has {2} digits.'
+    print(resultStr.format(description, bell_num, len(str(bell_num))))
 
     seconds = time.time() - start_time
     print('\nComputed in {:e} seconds'.format(seconds))
@@ -52,9 +59,11 @@ def get_bell(n):
 
     print('Method: Number triangle')
 
+    padding = len('{:,}'.format(n))
+
     # First row
     curr_row = [1]
-    print('{} -> 1'.format('1'.rjust(n / 10)))
+    print('{} -> 1'.format('1'.rjust(padding)))
 
     # Subsequent rows
     for num in range(1, n):
@@ -70,10 +79,11 @@ def get_bell(n):
             curr_addend = curr_row[i]
             curr_row.append(prev_addend + curr_addend)
 
-        # Print the result for this row of the number triangle
+        # Print the (approx.) result for this row of the number triangle
         bell_num = curr_row[len(curr_row) - 1]
-        result = '{} -> {:,}'
-        print(result.format('{:,}'.format(num + 1).rjust(n / 10), bell_num))
+        numStr = '{:,}'.format(num + 1).rjust(padding)
+        result = '{} -> {:e}'
+        print(result.format(numStr, bell_num))
 
         # Print the row in this number triangle
         # row_str = ''
