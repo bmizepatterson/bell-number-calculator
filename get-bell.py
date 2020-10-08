@@ -1,4 +1,5 @@
 import sys, getopt, time
+from decimal import Decimal
 
 def main(argv):
     try:
@@ -42,8 +43,12 @@ def main(argv):
         print('Aborted after {:e} seconds'.format(time.time() - start_time))
         sys.exit()
 
-    resultStr = '\nThe {0} is exactly:\n{1:,}\n\nOr approx. {1:e}\n\nIt has {2} digits.'
-    print(resultStr.format(description, bell_num, len(str(bell_num))))
+    bellWithThousands = '{:,}'.format(bell_num)
+    bellScientific = '{:0.5e}'.format(Decimal(bell_num))
+    bellDigits = len(str(bell_num))
+
+    resultStr = '\nThe {} is exactly:\n{}\n\nOr approx. {}\n\nIt has {} digits.'
+    print(resultStr.format(description, bellWithThousands, bellScientific, bellDigits))
 
     seconds = time.time() - start_time
     print('\nComputed in {:e} seconds'.format(seconds))
@@ -81,9 +86,9 @@ def get_bell(n):
 
         # Print the (approx.) result for this row of the number triangle
         bell_num = curr_row[len(curr_row) - 1]
-        numStr = '{:,}'.format(num + 1).rjust(padding)
-        result = '{} -> {:e}'
-        print(result.format(numStr, bell_num))
+        nStr = '{:,}'.format(num + 1).rjust(padding)
+        result = '{} -> {:0.5e}'
+        print(result.format(nStr, Decimal(bell_num)))
 
         # Print the row in this number triangle
         # row_str = ''
