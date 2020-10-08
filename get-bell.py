@@ -3,21 +3,31 @@ from decimal import Decimal
 
 def main(argv):
     try:
-        opts, args = getopt.getopt(argv, 'h')
+        opts, args = getopt.getopt(argv, 'n:o:h', ['number=', 'output=', 'help'])
     except getopt.GetoptError:
-        print('get-bell.py <n>')
+        usage()
         sys.exit(2)
 
-    for opt, _ in opts:
-        if opt == '-h':
-            print('get-bell.py <n>')
+    n, output = None, None
+    for opt, arg in opts:
+        if opt in ('-n', '--number'):
+            n = int(arg)
+        elif opt in ('-o', '--output'):
+            output = arg
+        elif opt in ('-h', '--help'):
+            usage()
             sys.exit()
+        else:
+            usage()
+            sys.exit(2)
 
-    if not args:
-        print('usage: get-bell.py <n>')
-        sys.exit(2)
-
-    n = int(args[0])
+    if not n:
+        if args:
+            n = int(args[0])
+        else:
+            print('Missing <number>')
+            usage()
+            sys.exit(2)
 
     if n < 0:
         print('Number must be greater than or equal to zero')
@@ -37,21 +47,35 @@ def main(argv):
 
     print('Computing the {}...\n'.format(description))
     start_time = time.time()
+
     try:
         bell_num = get_bell(n)
     except KeyboardInterrupt:
-        print('Aborted after {:e} seconds'.format(time.time() - start_time))
+        print('\nAborted after {:e} seconds'.format(time.time() - start_time))
         sys.exit()
 
     bellWithThousands = '{:,}'.format(bell_num)
     bellScientific = '{:0.5e}'.format(Decimal(bell_num))
-    bellDigits = len(str(bell_num))
 
-    resultStr = '\nThe {} is exactly:\n{}\n\nOr approx. {}\n\nIt has {} digits.'
-    print(resultStr.format(description, bellWithThousands, bellScientific, bellDigits))
+    approxResultStr = 'The {} is approximately:\n{}'.format(description, bellScientific)
+    exactResultStr = 'The {} is exactly:\n{}'.format(description, bellWithThousands)
 
     seconds = time.time() - start_time
-    print('\nComputed in {:e} seconds'.format(seconds))
+    executionStr = 'Computed in {:e} seconds'.format(seconds)
+    print('\n' + executionStr)
+
+    if displayScientific(bell_num):
+        print('\n' + approxResultStr)
+
+    print('\n' + exactResultStr)
+
+    # Print to output file if selected
+    if output:
+        with open(output, "w") as output_file:
+            output_file.write(executionStr + '\n\n')
+            if displayScientific(bell_num):
+                output_file.write(approxResultStr + '\n\n')
+            output_file.write(exactResultStr)
 
 
 def get_bell(n):
@@ -84,20 +108,28 @@ def get_bell(n):
             curr_addend = curr_row[i]
             curr_row.append(prev_addend + curr_addend)
 
-        # Print the (approx.) result for this row of the number triangle
+        # Print the result for this row of the number triangle
         bell_num = curr_row[len(curr_row) - 1]
         nStr = '{:,}'.format(num + 1).rjust(padding)
-        result = '{} -> {:0.5e}'
+        result = '{} -> {:0.5e}' if displayScientific(bell_num) else '{} -> {:,}'
         print(result.format(nStr, Decimal(bell_num)))
-
-        # Print the row in this number triangle
-        # row_str = ''
-        # for el in curr_row:
-        #     row_str = row_str + str(el) + ' '
-        # print(row_str)
 
     # The nth Bell number is the last index of the current row
     return bell_num
+
+def usage():
+    print('usages:')
+    print('\tget-bell.py <number>')
+    print('\tget-bell.py -n <number>')
+    print('\tget-bell.py --number=<number>')
+    print('\noptions:')
+    print('\t-h, --help\tDisplay this help information')
+    print('\t-o, --output\tOutput results to the given file')
+
+def displayScientific(num):
+    # Show a scientific notation approximation for numbers greater than
+    # a billion
+    return num > 10 ** 9
 
 
 if __name__ == "__main__":
