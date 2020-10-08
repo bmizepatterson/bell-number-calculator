@@ -108,14 +108,11 @@ def get_bell(n):
             curr_addend = curr_row[i]
             curr_row.append(prev_addend + curr_addend)
 
-        # Print the result for this row of the number triangle
-        bell_num = curr_row[len(curr_row) - 1]
-        nStr = '{:,}'.format(num + 1).rjust(padding)
-        result = '{} -> {:0.5e}' if displayScientific(bell_num) else '{} -> {:,}'
-        print(result.format(nStr, Decimal(bell_num)))
+        # Print the row number to indicate progress
+        print(str(num + 1))
 
     # The nth Bell number is the last index of the current row
-    return bell_num
+    return curr_row[len(curr_row) - 1]
 
 def usage():
     print('usages:')
